@@ -2,7 +2,7 @@
 
 namespace transport_db {
     std::optional<const Bus*> RequestHandler::GetBusStat(std::string_view bus_name) {
-        auto bus = db_.SearchRoute(bus_name);
+        const Bus* bus = db_.SearchRoute(bus_name);
         if (bus != nullptr) {
             return bus;
         }
@@ -12,7 +12,7 @@ namespace transport_db {
     }
 
     const std::set<std::string_view>* RequestHandler::GetBusesByStop(const std::string_view& stop_name) const {
-        auto stop = db_.SearchStop(stop_name);
+        const Stop* stop = db_.SearchStop(stop_name);
         if (!stop->buses.empty()) {
             return &(stop->buses);
         }

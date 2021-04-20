@@ -22,21 +22,8 @@ namespace json {
     class Node final : private std::variant<std::nullptr_t, Array, Dict, bool, int, double, std::string> {
         friend bool operator== (const Node& lhs, const Node& rhs);
         friend bool operator!= (const Node& lhs, const Node& rhs);
-    public:
-        /* //Cannot inherit std::variant constructors =((((
-        using NodeValue = std::variant<std::nullptr_t, Array, Dict, bool, int, double, std::string>;
-        using NodeValue::NodeValue;
-        using NodeValue::operator=;
-        */
-        /////Constructors Area/////////////////////////////////////////////////
-        Node() = default;
-        Node(std::nullptr_t value);
-        Node(Array value);
-        Node(Dict value);
-        Node(bool value);
-        Node(int value);
-        Node(double value);
-        Node(std::string value);
+    public:        
+        using NodeValue::variant;        
         /////Type Comprasion Area//////////////////////////////////////////////
         bool IsNull() const;
         bool IsArray() const;
@@ -53,9 +40,7 @@ namespace json {
         int AsInt() const;
         double AsDouble() const;
         const std::string& AsString() const;
-        const NodeValue& GetValue() const;
-    private:
-        NodeValue value_ = nullptr;
+        const NodeValue& GetValue() const;    
     };
     /////Document Part/////////////////////////////////////////////////////////
     class Document {

@@ -46,7 +46,8 @@ namespace json_reader {
 
         /////Get data from catalogue Area///////////////////////////////////////////////////////////
         RequestStat Stat(const json::Dict& dic) {
-            RequestStat stat;
+            RequestStat stat;   
+            using stat_data = std::variant<request_type>;
             stat.e_type = RequestType::STAT;
             stat.id = dic.at("id"s).AsInt();
             if (dic.at("type"s).AsString() == "Bus"s) { // STAT request type?
@@ -89,20 +90,20 @@ namespace json_reader {
         RenderSettings Map(const json::Dict& dic) {
             using namespace detail;
             RenderSettings res;
-            res.width = dic.at("width").AsDouble();
-            res.height = dic.at("height").AsDouble();
-            res.padding = dic.at("padding").AsDouble();
-            res.line_width = dic.at("line_width").AsDouble();
-            res.stop_radius = dic.at("stop_radius").AsDouble();
-            res.bus_label_font_size = dic.at("bus_label_font_size").AsInt();
-            res.bus_label_offset[0] = dic.at("bus_label_offset").AsArray()[0].AsDouble();
-            res.bus_label_offset[1] = dic.at("bus_label_offset").AsArray()[1].AsDouble();
-            res.stop_label_font_size = dic.at("stop_label_font_size").AsInt();
-            res.stop_label_offset[0] = dic.at("stop_label_offset").AsArray()[0].AsDouble();
-            res.stop_label_offset[1] = dic.at("stop_label_offset").AsArray()[1].AsDouble();
-            res.underlayer_color = ColorFromNode(dic.at("underlayer_color"));
-            res.underlayer_width = dic.at("underlayer_width").AsDouble();
-            for (const auto& node : dic.at("color_palette").AsArray()) {
+            res.width = dic.at("width"s).AsDouble();
+            res.height = dic.at("height"s).AsDouble();
+            res.padding = dic.at("padding"s).AsDouble();
+            res.line_width = dic.at("line_width"s).AsDouble();
+            res.stop_radius = dic.at("stop_radius"s).AsDouble();
+            res.bus_label_font_size = dic.at("bus_label_font_size"s).AsInt();
+            res.bus_label_offset[0] = dic.at("bus_label_offset"s).AsArray()[0].AsDouble();
+            res.bus_label_offset[1] = dic.at("bus_label_offset"s).AsArray()[1].AsDouble();
+            res.stop_label_font_size = dic.at("stop_label_font_size"s).AsInt();
+            res.stop_label_offset[0] = dic.at("stop_label_offset"s).AsArray()[0].AsDouble();
+            res.stop_label_offset[1] = dic.at("stop_label_offset"s).AsArray()[1].AsDouble();
+            res.underlayer_color = ColorFromNode(dic.at("underlayer_color"s));
+            res.underlayer_width = dic.at("underlayer_width"s).AsDouble();
+            for (const auto& node : dic.at("color_palette"s).AsArray()) {
                 res.color_palette.push_back(ColorFromNode(node));
             }
             return res;
@@ -169,7 +170,7 @@ namespace json_reader {
                     ProcessStopStatRequest(catalogue_.GetStop(s->name), dic); // fill dic with Stop data
                     std::visit(json::NodeValueSolution{ out }, json::Node(dic).GetValue());
                 }
-                else if (s->type == request_type::BUS) {
+                else if (s->type == request_type::BUS) {                    
                     ProcessBusStatRequest(catalogue_.GetRoute(s->name), dic); // fill dic with Stop data
                     std::visit(json::NodeValueSolution{ out }, json::Node(dic).GetValue());
                 }

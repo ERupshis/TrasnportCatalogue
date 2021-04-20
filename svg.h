@@ -103,6 +103,7 @@ namespace svg {
 
     std::ostream& operator<<(std::ostream& out, const StrokeLineCap line_cap);
     std::ostream& operator<<(std::ostream& out, const StrokeLineJoin line_join);
+    std::ostream& operator<<(std::ostream& out, const Color& color);
 
     template <typename Owner>
     class PathProps {
@@ -130,19 +131,35 @@ namespace svg {
             line_join_ = line_join;
             return AsOwner();
         }
-
+         
     protected:
-        ~PathProps() = default;
+        ~PathProps() = default;       
+        
+
+        template <typename T>
+        void FillData(std::ostream& out, std::string_view att_name, const std::optional<T>& att_value) const {
+            if (att_value) {
+                out << ' ' << att_name << "=\""sv << *att_value << "\""sv;
+            }
+        }
 
         void RenderAttrs(std::ostream& out) const {
             using namespace std::literals;
-
-            if (fill_color_) {                
+            FillData(out, "fill"sv, fill_color_);
+            FillData(out, "stroke"sv, stroke_color_);
+            FillData(out, "stroke-width"sv, width_);
+            FillData(out, "stroke-linecap"sv, line_cap_);
+            FillData(out, "stroke-linejoin"sv, line_join_);            
+        }
+        /*
+        void RenderAttrs(std::ostream& out) const {
+            using namespace std::literals;
+            if (fill_color_) {
                 out << " fill=\""sv;
-                std::visit(SolutionColor{ out }, *fill_color_);
+                std::visit(SolutionColor{ out }, * fill_color_);
                 out << "\""sv;
             }
-            if (stroke_color_) {                
+            if (stroke_color_) {
                 out << " stroke=\""sv;
                 std::visit(SolutionColor{ out }, *stroke_color_);
                 out << "\""sv;
@@ -157,6 +174,7 @@ namespace svg {
                 out << " stroke-linejoin=\""sv << *line_join_ << "\""sv;
             }
         }
+        */
 
     private:
         Owner& AsOwner() {            
@@ -243,5 +261,13 @@ namespace svg {
     };
 }  // namespace svg
 
+/////Template functions/methods//////////////////////////////////////////////////////////
+/////PathProps///////////////////////////////////////////////////////////////////////////
+template <typename T>
+void FillData(std::ostream& out, std::string_view att_name, const std::optional<T>& att_value) const {
+    if (att_value) {
+        out << ' ' << att_name << "=\""sv << *att_value << "\""sv;
+    }
+}
 
    

@@ -32,15 +32,15 @@ namespace map_renderer {
                 routes_to_render.insert(route.second);
             }
         }
-        DrawBusRoutes(projector, routes_to_render);
-        DrawRoutesNames(projector, routes_to_render);
-        DrawStops(projector);
-        DrawStopsNames(projector);
+        RenderBusRoutes(projector, routes_to_render);
+        RenderRoutesNames(projector, routes_to_render);
+        RenderStops(projector);
+        RenderStopsNames(projector);
         doc_.Render(out_stream);
 
     }    
 
-    void MapRenderer::DrawBusRoutes(SphereProjector& projector, const std::set<const Bus*, BusSort>& routes_to_render) {
+    void MapRenderer::RenderBusRoutes(SphereProjector& projector, const std::set<const Bus*, BusSort>& routes_to_render) {
         int color_index = 0;
         for (const auto& route : routes_to_render) {
             svg::Polyline line;
@@ -57,7 +57,7 @@ namespace map_renderer {
         }
     }
 
-    void MapRenderer::DrawRoutesNames(const SphereProjector& projector, const std::set<const Bus*, BusSort>& routes_to_render) {
+    void MapRenderer::RenderRoutesNames(const SphereProjector& projector, const std::set<const Bus*, BusSort>& routes_to_render) {
         int color_index = 0;
         svg::Text under_text, text;
         for (const auto& route : routes_to_render) {
@@ -93,7 +93,7 @@ namespace map_renderer {
 
     }
 
-    void MapRenderer::DrawStops(const SphereProjector& projector) {
+    void MapRenderer::RenderStops(const SphereProjector& projector) {
         svg::Circle circle;
         for (const auto& stop : stops_) {
             if (!stop.second->buses.empty()) {
@@ -105,7 +105,7 @@ namespace map_renderer {
         }
     }
 
-    void MapRenderer::DrawStopsNames(const SphereProjector& projector) {
+    void MapRenderer::RenderStopsNames(const SphereProjector& projector) {
         svg::Text text, under_text;
         for (const auto& stop : stops_) {
             if (!stop.second->buses.empty()) {

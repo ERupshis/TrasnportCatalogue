@@ -7,102 +7,79 @@ using namespace std;
 namespace json {
     /////Node Class Part/////////////////////////////////////////////////////////
     bool operator== (const Node& lhs, const Node& rhs) {
-        return lhs.value_ == rhs.value_;
+        return lhs.GetValue() == rhs.GetValue();
     }
     bool operator!= (const Node& lhs, const Node& rhs) {
         return !(lhs == rhs);
-    }
-    /////Conctructor Area////////////////////////////////////////////////////////
-    Node::Node(std::nullptr_t value)
-        :value_(value) {
-    }
-    Node::Node(Array value)
-        :value_(std::move(value)) {
-    }
-    Node::Node(Dict value)
-        :value_(std::move(value)) {
-    }
-    Node::Node(bool value)
-        :value_(value) {
-    }
-    Node::Node(int value)
-        :value_(value) {
-    }
-    Node::Node(double value)
-        :value_(value) {
-    }
-    Node::Node(std::string value)
-        :value_(std::move(value)) {
-    }
+    }   
     /////Type Comprasion Area////////////////////////////////////////////////////
     bool Node::IsNull() const {
-        return std::holds_alternative<std::nullptr_t>(value_);
+        return std::holds_alternative<std::nullptr_t>(*this);
     }
     bool Node::IsArray() const {
-        return std::holds_alternative<Array>(value_);
+        return std::holds_alternative<Array>(*this);
     }
     bool Node::IsMap() const {
-        return std::holds_alternative<Dict>(value_);
+        return std::holds_alternative<Dict>(*this);
     }
     bool Node::IsBool() const {
-        return std::holds_alternative<bool>(value_);
+        return std::holds_alternative<bool>(*this);
     }
     bool Node::IsInt() const {
-        return std::holds_alternative<int>(value_);
+        return std::holds_alternative<int>(*this);
     }
     bool Node::IsDouble() const {
-        return std::holds_alternative<double>(value_) || std::holds_alternative<int>(value_);
+        return std::holds_alternative<double>(*this) || std::holds_alternative<int>(*this);
     }
     bool Node::IsPureDouble() const {
-        return std::holds_alternative<double>(value_);
+        return std::holds_alternative<double>(*this);
     }
     bool Node::IsString() const {
-        return std::holds_alternative<std::string>(value_);
+        return std::holds_alternative<std::string>(*this);
     }
     /////Get Value Area/////////////////////////////////////////////////////////////////////
     const Array& Node::AsArray() const {
         if (!IsArray()) {
-            throw std::logic_error("");
+            throw std::logic_error("Node value is not an Array"s);
         }
-        return std::get<Array>(value_);
+        return std::get<Array>(*this);
     }
     const Dict& Node::AsMap() const {
         if (!IsMap()) {
-            throw std::logic_error("");
+            throw std::logic_error("Node value is not a Map"s);
         }
-        return std::get<Dict>(value_);
+        return std::get<Dict>(*this);
     }
     bool Node::AsBool() const {
         if (!IsBool()) {
-            throw std::logic_error("");
+            throw std::logic_error("Node value is not a Bool"s);
         }
-        return std::get<bool>(value_);
+        return std::get<bool>(*this);
     }
     int Node::AsInt() const {
         if (!IsInt()) {
-            throw std::logic_error("");
+            throw std::logic_error("Node value is not an Integer"s);
         }
-        return std::get<int>(value_);
+        return std::get<int>(*this);
     }
-    double Node::AsDouble() const {
-        auto value_index = value_.index();
-        if (value_index != 4 && value_index != 5) {
-            throw std::logic_error("");
+    double Node::AsDouble() const {        
+        if (!std::holds_alternative<int>(*this) && !std::holds_alternative<double>(*this)) {
+            throw std::logic_error("Node value is not a Double"s);
         }
-        if (value_.index() == 4) {
-            return std::get<int>(value_);
+        if (std::holds_alternative<int>(*this)) {
+            return std::get<int>(*this);
         }
-        return std::get<double>(value_);
+        return std::get<double>(*this);
     }
     const std::string& Node::AsString() const {
         if (!IsString()) {
-            throw std::logic_error("");
+            throw std::logic_error("Node value is not a String"s);
         }
-        return std::get<std::string>(value_);
+        return std::get<std::string>(*this);
     }
 
     const NodeValue& Node::GetValue() const {
-        return value_;
+        return *this;
     }
     /////END of Node Class Part///////////////////////////////////////////////
     /////LoadNode Namespace///////////////////////////////////////////////////

@@ -90,6 +90,12 @@ namespace svg {
         return out;
     }
 
+    std::ostream& operator<<(std::ostream& out, const Color& color) {
+        using namespace std;
+        std::visit(SolutionColor{ out }, color);
+        return out;
+    }
+
     // ---------- Circle ------------------
 
     Circle& Circle::SetCenter(Point center) {
@@ -103,7 +109,7 @@ namespace svg {
     }
 
     void Circle::RenderObject(const RenderContext& context) const {
-        auto& out = context.out;
+        std::ostream& out = context.out;
         out << "<circle cx=\""sv << center_.x << "\" cy=\""sv << center_.y << "\" "sv;
         out << "r=\""sv << radius_ << "\""sv;
         RenderAttrs(out);
@@ -119,7 +125,7 @@ namespace svg {
     }
 
     void Polyline::RenderObject(const RenderContext& context) const {
-        auto& out = context.out;
+        std::ostream& out = context.out;
         out << "<polyline points=\""sv;
         for (size_t i = 0; i < points_.size(); ++i) {
             out << points_[i].x << ","sv << points_[i].y;
@@ -163,20 +169,14 @@ namespace svg {
         return *this;
     }
     
-    void Text::RenderObject(const RenderContext& context) const {
-        char ch1(34);
-        char ch2(60);
-        char ch3(62);
-        char ch4(39);
-        char ch5(38);
-
-        std::vector<std::pair<char, std::string>> symbols{ {ch5,"&amp;"s},{ch1,"&quot;"s},{ch2,"&lt;"s},{ch3,"&gt;"s},{ch4,"&apos;"} };
+    void Text::RenderObject(const RenderContext& context) const {        
+        std::vector<std::pair<char, std::string>> symbols{ {'&', "&amp;"s},{'"', "&quot;"s},{'<', "&lt;"s},{'>', "&gt;"s},{'\'', "&apos;"} };
         std::string result = data_;
         const size_t pos_end = data_.npos;
         size_t space;
         for (auto [ch, str] : symbols) {
             while (true) {
-                if (result.find("&amp;"s) != pos_end && ch == ch5) {
+                if (result.find("&amp;"s) != pos_end && ch == '&') {
                     break;
                 }
                 space = result.find(ch);
@@ -190,7 +190,7 @@ namespace svg {
             }
         }
 
-        auto& out = context.out;        
+        std::ostream& out = context.out;
         out << "<text"sv;
         RenderAttrs(out);
         out << " x=\""sv << pos_.x << "\" y=\""sv << pos_.y << "\" "sv;
