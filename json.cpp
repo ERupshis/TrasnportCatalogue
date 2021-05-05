@@ -329,14 +329,14 @@ namespace json {
         out << "null"s;
     }
     void NodeValueSolution::operator() (const Array& value) {
-        out << "["s;
+        out << "["s << std::endl;
         for (auto iter = value.begin(); iter < value.end(); ++iter) {
             std::visit(NodeValueSolution{ out }, iter->GetValue());
             if (value.end() - iter > 1) {
-                out << ", "s;
+                out << ',' << std::endl;
             }
         }
-        out << "]"s;
+        out << std::endl << "]"s << std::endl;
     }
     void NodeValueSolution::operator() (const Dict& value) {
         out << "{"s;

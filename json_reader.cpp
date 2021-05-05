@@ -46,8 +46,7 @@ namespace json_reader {
 
         /////Get data from catalogue Area///////////////////////////////////////////////////////////
         RequestStat Stat(const json::Dict& dic) {
-            RequestStat stat;   
-            using stat_data = std::variant<request_type>;
+            RequestStat stat;               
             stat.e_type = RequestType::STAT;
             stat.id = dic.at("id"s).AsInt();
             if (dic.at("type"s).AsString() == "Bus"s) { // STAT request type?
@@ -154,40 +153,52 @@ namespace json_reader {
                 catalogue_.SetDistBtwStops(main_stop, des_stop, dist);
             }
         }
-    }
+    }  
 
     void JsonReader::PrintRequests(std::ostream& out) {
+        //Builder request{};
+        //request.StartArray();
         out << "["s << std::endl;
         bool first = true;
         for (const auto& elem : requests_) {
-            if (RequestStat* s = dynamic_cast<RequestStat*>(elem.get())) {
+            if (RequestStat* s = dynamic_cast<RequestStat*>(elem.get())) { 
                 if (!first) {
                     out << ',' << std::endl;
                 }
-                json::Dict dic;
-                dic["request_id"s] = s->id;
                 if (s->type == request_type::STOP) {
-                    ProcessStopStatRequest(catalogue_.GetStop(s->name), dic); // fill dic with Stop data
-                    std::visit(json::NodeValueSolution{ out }, json::Node(dic).GetValue());
+                    Builder request{};
+                    request.StartDict().Key("request_id"s).Value(s->id);
+                    ProcessStopStatRequest(catalogue_.GetStop(s->name), request);
+                    request.EndDict();
+                    Print(Document{ request.Build() }, out);
                 }
-                else if (s->type == request_type::BUS) {                    
-                    ProcessBusStatRequest(catalogue_.GetRoute(s->name), dic); // fill dic with Stop data
-                    std::visit(json::NodeValueSolution{ out }, json::Node(dic).GetValue());
+                else if (s->type == request_type::BUS) {
+                    Builder request{};
+                    request.StartDict().Key("request_id"s).Value(s->id);
+                    ProcessBusStatRequest(catalogue_.GetRoute(s->name), request); // fill dic with Stop data     
+                    request.EndDict();
+                    Print(Document{ request.Build() }, out);
                 }
                 else if (s->type == request_type::MAP) {
+                    Builder request{};
+                    request.StartDict().Key("request_id"s).Value(s->id);
                     transport_db::RequestHandler request_handler(catalogue_, renderer_);
                     request_handler.SetRoutesForRender();
                     request_handler.SetStopsForRender();
                     std::stringstream strm;
                     renderer_.Render(strm);
-                    dic["map"s] = strm.str();
-                    std::visit(json::NodeValueSolution{ out }, json::Node(dic).GetValue());
+                    request.Key("map"s).Value(strm.str());
+                    request.EndDict();
+                    Print(Document{ request.Build() }, out);
                 }
-                first = false;
+                first = false;                
             }
         }
         out << std::endl << "]"s << std::endl;
+        //request.EndArray();
+         // print after 
     }
+
 
     void JsonReader::FillDoc(std::istream& strm) { // read JSON doc
         document_ = json::Load(strm);
@@ -209,7 +220,10 @@ namespace json_reader {
     void JsonReader::FillStat(const std::vector<Node>& vec) { // add Get request
         for (const auto& elem : vec) {
             if (elem.AsMap().count("type"s)) {
-                if (elem.AsMap().at("type"s).AsString() == "Bus"s || elem.AsMap().at("type"s).AsString() == "Stop"s || elem.AsMap().at("type"s).AsString() == "Map"s) {
+                if (elem.AsMap().at("type"s).AsString() == "Bus"s 
+                    || elem.AsMap().at("type"s).AsString() == "Stop"s 
+                    || elem.AsMap().at("type"s).AsString() == "Map"s
+                ) {
                     requests_.emplace_back(std::make_unique<RequestStat>(detail::Stat(elem.AsMap())));
                 }
             }
@@ -219,36 +233,36 @@ namespace json_reader {
     void JsonReader::FillRender(const std::map<std::string, Node>& dic) { // add Add Render settings request
         renderer_.SetSettings(Map(dic));
     }
-
-    void JsonReader::ProcessStopStatRequest(const TransportCatalogue::StopOutput& request, Dict& dic) { //overload for GetRoute() STOP
-        json::Array res_buses;
-        auto [X, buses] = request;
-        if (X[0] == '!') {
-            dic["error_message"s] = "not found"s;
+    
+    void JsonReader::ProcessStopStatRequest(const TransportCatalogue::StopOutput& request, Builder& dict) { //overload for GetRoute() STOP        
+        auto [X, buses] = request;        
+        if (X[0] == '!') {            
+            dict.Key("error_message"s).Value("not found"s);
             return;
-        }
+        }            
         if (buses.size() == 0) {
-            dic["buses"s] = res_buses;
+            dict.Key("buses"s).StartArray().EndArray();
         }
-        else {
+        else { 
+            dict.Key("buses"s).StartArray();
             for (auto& bus : buses) {
                 std::string s_bus(bus);
-                res_buses.emplace_back(json::Node(s_bus));
-            }
-            dic["buses"s] = res_buses;
+                dict.Value(std::move(s_bus));
+            }            
+            dict.EndArray();
         }
     }
 
-    void JsonReader::ProcessBusStatRequest(const TransportCatalogue::RouteOutput& request, Dict& dic) { //overload for GetRoute() BUS
+    void JsonReader::ProcessBusStatRequest(const TransportCatalogue::RouteOutput& request, Builder& dict) { //overload for GetRoute() BUS
         auto [X, R, U, L, C] = request;
         if (X[0] != '!') {
-            dic["curvature"s] = C;
-            dic["route_length"s] = L;
-            dic["stop_count"s] = static_cast<int>(R);
-            dic["unique_stop_count"s] = static_cast<int>(U);
+            dict.Key("curvature"s).Value(C)
+                .Key("route_length"s).Value(L)
+                .Key("stop_count"s).Value(static_cast<int>(R))
+                .Key("unique_stop_count"s).Value(static_cast<int>(U));
         }
         else {
-            dic["error_message"s] = "not found"s;
-        }
-    }    
+            dict.Key("error_message"s).Value("not found"s);
+        }        
+    }   
 }

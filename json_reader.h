@@ -1,6 +1,7 @@
 ﻿#pragma once
 
 #include "json.h"
+#include "json_builder.h"
 #include "request_handler.h"
 #include "map_renderer.h"
 #include "transport_catalogue.h"
@@ -83,8 +84,10 @@ namespace json_reader {
         void FillStat(const std::vector<Node>& vec);
         void FillRender(const std::map<std::string, json::Node>& dic);
 
-        void ProcessStopStatRequest(const TransportCatalogue::StopOutput& request, Dict& dic);
-        void ProcessBusStatRequest(const TransportCatalogue::RouteOutput& request, Dict& dic);
+        //void ProcessStopStatRequest(const TransportCatalogue::StopOutput& request, Dict& dic);
+        void ProcessStopStatRequest(const TransportCatalogue::StopOutput& request, Builder& dict);
+        //void ProcessBusStatRequest(const TransportCatalogue::RouteOutput& request, Dict& dic);
+        void ProcessBusStatRequest(const TransportCatalogue::RouteOutput& request, Builder& dict);
     };
 }
 

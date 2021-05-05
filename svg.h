@@ -264,7 +264,8 @@ namespace svg {
 /////Template functions/methods//////////////////////////////////////////////////////////
 /////PathProps///////////////////////////////////////////////////////////////////////////
 template <typename T>
-void FillData(std::ostream& out, std::string_view att_name, const std::optional<T>& att_value) const {
+void FillData(std::ostream& out, std::string_view att_name, const std::optional<T>& att_value)  {
+    using namespace std::literals;
     if (att_value) {
         out << ' ' << att_name << "=\""sv << *att_value << "\""sv;
     }
