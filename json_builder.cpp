@@ -2,6 +2,16 @@
 
 namespace json {
     /////BUILDER CLASS AREA///////////////////////////////////////////////////////// 
+    Node Builder::Build() {
+        using namespace std;
+        if (node_ended_) { // return Node if it's ended
+            return *nodes_stack_.back();
+        }
+        else {
+            throw std::logic_error("Build() is failed. Node is not ended"s);
+        }
+    }
+
     Builder::DictValue Builder::Key(std::string key) {
         using namespace std;
         
@@ -137,35 +147,25 @@ namespace json {
         return *this;
     }
 
-    Node Builder::Build() {
-        using namespace std;
-        if (node_ended_) { // return Node if it's ended
-            return *nodes_stack_.back();
-        }
-        else {
-            throw std::logic_error("Build() is failed. Node is not ended"s);
-        }
-    }
-
     /////AUXILIARY CLASSES AREA/////////////////////////////////////////////////////////  
     Builder::DictValue Builder::Context::Key(const std::string& key) {
-        return b_.Key(key);
+        return builder_.Key(key);
     }
     Builder& Builder::Context::ContValue(const NodeValue& value) {
-        return b_.Value(value);
+        return builder_.Value(value);
     }
 
     Builder::DictItem Builder::Context::StartDict() {
-        return b_.StartDict();
+        return builder_.StartDict();
     }
     Builder& Builder::Context::EndDict() {
-        return b_.EndDict();
+        return builder_.EndDict();
     }
 
     Builder::ArrayItem Builder::Context::StartArray() {
-        return b_.StartArray();
+        return builder_.StartArray();
     }
     Builder& Builder::Context::EndArray() {
-        return b_.EndArray();
+        return builder_.EndArray();
     }
 }

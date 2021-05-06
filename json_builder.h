@@ -17,7 +17,7 @@ namespace json {
 		class Context {
 		public:
 			Context(Builder& b)
-				:b_(b) {
+				:builder_(b) {
 			}
 
 			DictValue Key(const std::string& key); // for DictItem
@@ -32,7 +32,7 @@ namespace json {
 			Builder& ContValue(const NodeValue& value); // Problem with 2 different types of Value (for Map and Array). 
 														// It's just some king of wrapper to delegate Builder's Value method to inherited classes
 		private:
-			Builder& b_;
+			Builder& builder_;
 		};
 
 
@@ -78,6 +78,8 @@ namespace json {
 	public:
 		Builder() = default;
 
+		Node Build();
+
 		DictValue Key(std::string key);
 
 		Builder& Value(NodeValue value);
@@ -87,8 +89,7 @@ namespace json {
 
 		ArrayItem StartArray();
 		Builder& EndArray();
-
-		Node Build();
+		
 	private:
 		//Node root_; // is it really needed? probably it can be used to avoid some copy		
 		bool node_ended_ = false;
