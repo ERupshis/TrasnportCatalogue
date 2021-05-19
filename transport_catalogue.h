@@ -13,6 +13,13 @@
 #include <set>
 
 namespace transport_db {
+	struct SV_SV_Hasher {
+		size_t operator()(const std::pair<std::string_view, std::string_view>& stop_to_stop) const {
+			return sv_hasher(stop_to_stop.first) + 37 * sv_hasher(stop_to_stop.second);
+		}
+		std::hash<std::string_view> sv_hasher;
+	};
+
 	using namespace domain;
 	class TransportCatalogue {
 	public:
@@ -52,18 +59,23 @@ namespace transport_db {
 		const StopsMap& GetStopsForRender() const {
 			return stops_;
 		}
+
+		using DistMap = std::unordered_map<std::pair<std::string_view, std::string_view>, int, SV_SV_Hasher>;
+		const DistMap& GetDistForRouter() const {
+			return dist_btw_stops_;
+		}
 		//////////////////////////////////////////////////////////////////////////////////////////
 		~TransportCatalogue() {};
 	private:
 		std::deque<std::string> stops_names_; // storage for unique STOPS
 		std::deque<std::string> buses_names_; // storage for unique BUSES
-
+		/*
 		struct SV_SV_Hasher {
 			size_t operator()(const std::pair<std::string_view, std::string_view>& stop_to_stop) const {
 				return sv_hasher(stop_to_stop.first) + 37 * sv_hasher(stop_to_stop.second);
 			}
 			std::hash<std::string_view> sv_hasher;
-		};
+		};*/
 		std::unordered_map<std::pair<std::string_view, std::string_view>, int, SV_SV_Hasher> dist_btw_stops_; // STOP to STOP dist storage
 
 		std::unordered_map<std::string_view, Stop> stops_;

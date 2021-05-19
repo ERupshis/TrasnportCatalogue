@@ -5,6 +5,7 @@
 #include "request_handler.h"
 #include "map_renderer.h"
 #include "transport_catalogue.h"
+#include "transport_router.h"
 
 #include <sstream>
 #include <variant>
@@ -17,6 +18,7 @@ namespace json_reader {
     using namespace transport_db;
     using namespace json;
     using namespace map_renderer;
+    using namespace transport_router;
     namespace detail {
 /////Request structures Part//////////////////////////////////////////////////////////////
         enum class RequestType {
@@ -25,17 +27,25 @@ namespace json_reader {
             RENDER, // generste map
             EMPTY // non initialized              
         };
-        enum class request_type { BUS, STOP, MAP, EMPTY };
+        enum class request_type { BUS, STOP, MAP, ROUTE, EMPTY }; ///SPRINT12
 
         struct Request { // Parent
             RequestType e_type = RequestType::EMPTY;
             request_type type = request_type::EMPTY;
             virtual ~Request() = default;
         };
+
+        struct RequestStatRoute { ///SPRINT12
+            std::string from;
+            std::string to;
+        };
+
         struct RequestStat : public Request { // Child for get data
             std::string name; // name is needed for Bus of Stop name to search
             int id = 0;
+            RequestStatRoute route; ///SPRINT12
         };
+        
         struct RequestStop : public Request { // Child for get Stop data
             std::string name;
             double latitude = 0;
@@ -63,8 +73,8 @@ namespace json_reader {
 /////JsonReader class part/////////////////////////////////////////////////////////////////
     class JsonReader {
     public:
-        JsonReader(TransportCatalogue& catalogue, MapRenderer& renderer)
-            :catalogue_(catalogue), renderer_(renderer) {
+        JsonReader(TransportCatalogue& catalogue, MapRenderer& renderer, TransportRouter& router) ///SPRINT12
+            :catalogue_(catalogue), renderer_(renderer), router_(router) {
         }
 
         void ReadInput(std::istream& input);
@@ -78,15 +88,15 @@ namespace json_reader {
         Document document_;
         std::vector<std::unique_ptr<Request>> requests_;
         MapRenderer& renderer_;
+        TransportRouter& router_; ///SPRINT 12
 
         void FillDoc(std::istream& strm);
         void FillBase(const std::vector <Node>& vec);
         void FillStat(const std::vector<Node>& vec);
         void FillRender(const std::map<std::string, json::Node>& dic);
-
-        //void ProcessStopStatRequest(const TransportCatalogue::StopOutput& request, Dict& dic);
-        void ProcessStopStatRequest(const TransportCatalogue::StopOutput& request, Builder& dict);
-        //void ProcessBusStatRequest(const TransportCatalogue::RouteOutput& request, Dict& dic);
+        void FillRouting(const std::map<std::string, Node>& dic); ///SPRINT12
+        
+        void ProcessStopStatRequest(const TransportCatalogue::StopOutput& request, Builder& dict);        
         void ProcessBusStatRequest(const TransportCatalogue::RouteOutput& request, Builder& dict);
     };
 }

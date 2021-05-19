@@ -60,6 +60,11 @@ namespace json_reader {
             else if (dic.at("type"s).AsString() == "Map"s) {
                 stat.type = request_type::MAP;
             }
+            else if (dic.at("type"s).AsString() == "Route"s) { ///SPRINT12
+                stat.type = request_type::ROUTE;
+                stat.route.from = dic.at("from"s).AsString();
+                stat.route.to = dic.at("to"s).AsString();
+            }
             return stat;
         }
 
@@ -86,7 +91,7 @@ namespace json_reader {
             }
         }
 
-        RenderSettings Map(const json::Dict& dic) {
+        RenderSettings RenderMap(const json::Dict& dic) {
             using namespace detail;
             RenderSettings res;
             res.width = dic.at("width"s).AsDouble();
@@ -107,6 +112,14 @@ namespace json_reader {
             }
             return res;
         }
+
+        RouterSettings RouterMap(const json::Dict& dic) { ///SPRINT12
+            using namespace detail;
+            RouterSettings res;
+            res.bus_velocity = dic.at("bus_velocity"s).AsInt();
+            res.bus_wait_time = dic.at("bus_wait_time"s).AsInt();            
+            return res;
+        }
     }
     using namespace detail;
     /////JsonReader class part/////////////////////////////////////////////////////////////////  
@@ -121,6 +134,9 @@ namespace json_reader {
             }
             else if (elem.first == "render_settings"s) {
                 FillRender(elem.second.AsMap()); //set render settings
+            }
+            else if (elem.first == "routing_settings"s) { ///SPRINT 12
+                FillRouting(elem.second.AsMap()); //set render settings
             }
         }
     }
@@ -156,8 +172,10 @@ namespace json_reader {
     }  
 
     void JsonReader::PrintRequests(std::ostream& out) {
-        //Builder request{};
-        //request.StartArray();
+        transport_db::RequestHandler request_handler(catalogue_, renderer_, router_); ///SPRINT12
+        request_handler.SetCatalogueDataToRouter(); ///SPRINT12        
+        request_handler.GenerateRouter(); ///SPRINT12  
+        
         out << "["s << std::endl;
         bool first = true;
         for (const auto& elem : requests_) {
@@ -182,21 +200,60 @@ namespace json_reader {
                 else if (s->type == request_type::MAP) {
                     Builder request{};
                     request.StartDict().Key("request_id"s).Value(s->id);
-                    transport_db::RequestHandler request_handler(catalogue_, renderer_);
-                    request_handler.SetRoutesForRender();
-                    request_handler.SetStopsForRender();
+                    transport_db::RequestHandler request_handler(catalogue_, renderer_, router_); ///SPRINT12
+                    request_handler.SetCatalogueDataToRender();                    
                     std::stringstream strm;
                     renderer_.Render(strm);
                     request.Key("map"s).Value(strm.str());
                     request.EndDict();
                     Print(Document{ request.Build() }, out);
                 }
+                else if (s->type == request_type::ROUTE) { ///SPRINT12
+                    Builder request{};                    
+                    const std::vector<Edges>* edges_data = router_.GetEdgesData();
+                    auto route_data = router_.GetRoute(s->route.from, s->route.to);                    
+                    request.StartDict().Key("request_id"s).Value(s->id);                        
+                        if (route_data->edges.size() > 0 && route_data) { // route is generated
+                            request.Key("total_time"s).Value(route_data->weight)
+                                .Key("items")
+                                .StartArray();
+                            for (size_t edge_id : route_data->edges) {
+                                std::string name{ edges_data->at(edge_id).name };
+                                if (edges_data->at(edge_id).type == edge_type::WAIT) { // graph edge belongs to Stop
+                                    request.StartDict()
+                                        .Key("stop_name"s).Value(name)
+                                        .Key("time"s).Value(edges_data->at(edge_id).time)
+                                        .Key("type"s).Value("Wait"s)
+                                        .EndDict();
+                                }
+                                else { // graph edge belongs to bus
+                                    request.StartDict()
+                                        .Key("bus"s).Value(name)
+                                        .Key("time"s).Value(edges_data->at(edge_id).time)
+                                        .Key("type"s).Value("Bus"s)
+                                        .Key("span_count"s).Value(static_cast<int>(edges_data->at(edge_id).span_count))
+                                        .EndDict();
+                                }
+                                    
+                            }
+                            request.EndArray();
+                        }
+                        else if (!route_data) { // failed to create route
+                            request.Key("error_message"s).Value("not found"s);
+                        }
+                        else { // stop FROM = stop TO
+                            request.Key("total_time"s).Value(0)
+                                .Key("items")
+                                .StartArray()
+                                .EndArray();
+                        }
+                        request.EndDict();  
+                    Print(Document{ request.Build() }, out);
+                }
                 first = false;                
             }
         }
-        out << std::endl << "]"s << std::endl;
-        //request.EndArray();
-         // print after 
+        out << std::endl << "]"s << std::endl;        
     }
 
 
@@ -223,6 +280,7 @@ namespace json_reader {
                 if (elem.AsMap().at("type"s).AsString() == "Bus"s 
                     || elem.AsMap().at("type"s).AsString() == "Stop"s 
                     || elem.AsMap().at("type"s).AsString() == "Map"s
+                    || elem.AsMap().at("type"s).AsString() == "Route"s ///SPRINT12
                 ) {
                     requests_.emplace_back(std::make_unique<RequestStat>(detail::Stat(elem.AsMap())));
                 }
@@ -231,7 +289,11 @@ namespace json_reader {
     }
 
     void JsonReader::FillRender(const std::map<std::string, Node>& dic) { // add Add Render settings request
-        renderer_.SetSettings(Map(dic));
+        renderer_.SetSettings(RenderMap(dic));
+    }
+
+    void JsonReader::FillRouting(const std::map<std::string, Node>& dic) { // add Add Routing settings request ///SPRINT12
+        router_.SetSettings(RouterMap(dic));
     }
     
     void JsonReader::ProcessStopStatRequest(const TransportCatalogue::StopOutput& request, Builder& dict) { //overload for GetRoute() STOP        

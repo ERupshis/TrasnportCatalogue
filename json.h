@@ -23,9 +23,10 @@ namespace json {
         friend bool operator== (const Node& lhs, const Node& rhs);
         friend bool operator!= (const Node& lhs, const Node& rhs);
     public:        
-        using NodeValue::variant;   
+        using variant::variant;
+        using Value = variant;
 
-        Node(json::Node::NodeValue& value) {
+        Node(json::Node::Value& value) {
             this->swap(value);
         }
         /////Type Comprasion Area//////////////////////////////////////////////

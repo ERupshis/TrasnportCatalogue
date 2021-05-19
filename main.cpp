@@ -1,46 +1,4 @@
-﻿/*#include "json_builder.h"
-#include <iostream>
-
-
-using namespace std;
-
-int main() {
-    json::Print(
-        json::Document{
-            json::Builder{}
-            .StartDict()
-                .Key("key1"s).Value(123)
-                .Key("key2"s).Value("value2"s)
-                .Key("key3"s).StartArray()
-                    .Value(456)
-                    .StartDict().EndDict()
-                    .StartDict()
-                        .Key(""s)
-                        .Value(nullptr)
-                    .EndDict()
-                    .Value(""s)
-                .EndArray()
-            .EndDict()
-            .Build()
-        },
-        cout
-    );
-    cout << endl;
-    
-    json::Print(
-        json::Document{
-            json::Builder{}
-            .Value("just a string"s)
-            .Build()
-        },
-        cout
-    );
-    cout << endl;
-}
-*/
-
-
-//#include "transport_catalogue.h"
+﻿//#include "transport_catalogue.h"
 
 
 #include "json_reader.h"
@@ -49,20 +7,18 @@ int main() {
 
 #include <iostream>
 #include <random>
+#include <fstream>
 
 using namespace std;
-int main() {
-    //system("chcp 1251");
+int main() {    
     transport_db::TransportCatalogue catalog;  
     map_renderer::MapRenderer renderer;
-    json_reader::JsonReader json(catalog, renderer);
-    transport_db::RequestHandler request(catalog, renderer);
+    transport_router::TransportRouter router;
+    json_reader::JsonReader json(catalog, renderer, router);
+    transport_db::RequestHandler request(catalog, renderer, router);	
 
     json.ReadInput(cin);        //read json
     json.FillCatalogue();    //send data to catalogue
-    json.PrintRequests(cout);    //complete queries and write output to json   
-    //request.SetRoutesForRender();
-    //request.SetStopsForRender();
-    //renderer.Render(cout);
+    json.PrintRequests(cout);    //complete queries and write output to json       
     return 0;
 }

@@ -24,6 +24,7 @@
     <ProjectGuid>{60e5f47e-c6a3-429e-8d19-02924b0648eb}</ProjectGuid>
     <RootNamespace>Sprint10</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+    <ProjectName>Sprint12</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -117,6 +118,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
+      <LanguageStandard>stdcpplatest</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -150,17 +152,22 @@
     <ClCompile Include="request_handler.cpp" />
     <ClCompile Include="svg.cpp" />
     <ClCompile Include="transport_catalogue.cpp" />
+    <ClCompile Include="transport_router.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="domain.h" />
     <ClInclude Include="geo.h" />
+    <ClInclude Include="graph.h" />
     <ClInclude Include="json.h" />
     <ClInclude Include="json_builder.h" />
     <ClInclude Include="json_reader.h" />
     <ClInclude Include="map_renderer.h" />
+    <ClInclude Include="ranges.h" />
     <ClInclude Include="request_handler.h" />
+    <ClInclude Include="router.h" />
     <ClInclude Include="svg.h" />
     <ClInclude Include="transport_catalogue.h" />
+    <ClInclude Include="transport_router.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
