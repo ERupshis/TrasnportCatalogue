@@ -14,7 +14,7 @@
 namespace transport_db {
     struct RouterSettings { ///SPRINT12
         int bus_wait_time = 6; // minutes    
-        int bus_velocity = 40; // km/h       
+        int bus_velocity_kmh = 40; // km/h       
     };    
 }
 
@@ -39,13 +39,11 @@ namespace transport_router {
     /////MapRenderer Class part//////////////////////////////////////////////////////////  
     class TransportRouter { ///SPRINT12
     public:
-        TransportRouter() = default;
+        TransportRouter(const TransportCatalogue& catalogue) 
+            :catalogue_(catalogue) {
+        }
 
         void SetSettings(const RouterSettings& settings);
-
-        void SetStops(const std::map<std::string_view, const Stop*> stops);
-        void SetRoutes(const std::map<std::string_view, const Bus*> routes);
-        void SetDistances(const std::unordered_map<std::pair<std::string_view, std::string_view>, int, SV_SV_Hasher>& distances);
 
         void GenerateRouter();
 
@@ -56,9 +54,8 @@ namespace transport_router {
         
     private:
         RouterSettings settings_;   
-        std::map<std::string_view, const Stop*> stops_;
-        std::map<std::string_view, const Bus*> routes_;
-        const std::unordered_map<std::pair<std::string_view, std::string_view>, int, SV_SV_Hasher>* distances_ = nullptr; // STOP to STOP dist storage
+        const TransportCatalogue&  catalogue_;
+        
         std::unique_ptr<graph::Router<double>> router_ = nullptr;
 
         enum class vertex_type {
@@ -68,13 +65,18 @@ namespace transport_router {
         };
 
         graph::DirectedWeightedGraph<double> graph_;
-        struct Vertexes {            
+        struct Vertex {            
             std::string_view name;
             vertex_type type = vertex_type::EMPTY;
             size_t id;
         };  
+
+        struct StopAsVertexes {
+            Vertex in;
+            Vertex out;
+        };
         
-        std::map<std::string_view, std::pair<Vertexes, Vertexes>> vertexes_;
+        std::map<std::string_view, StopAsVertexes> vertexes_;
         std::vector<Edges> edges_;
         
         //////////////////////////////////////////////////////////////////////////////////////       

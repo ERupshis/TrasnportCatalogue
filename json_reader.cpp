@@ -116,7 +116,7 @@ namespace json_reader {
         RouterSettings RouterMap(const json::Dict& dic) { ///SPRINT12
             using namespace detail;
             RouterSettings res;
-            res.bus_velocity = dic.at("bus_velocity"s).AsInt();
+            res.bus_velocity_kmh = dic.at("bus_velocity"s).AsInt();
             res.bus_wait_time = dic.at("bus_wait_time"s).AsInt();            
             return res;
         }
@@ -172,8 +172,7 @@ namespace json_reader {
     }  
 
     void JsonReader::PrintRequests(std::ostream& out) {
-        transport_db::RequestHandler request_handler(catalogue_, renderer_, router_); ///SPRINT12
-        request_handler.SetCatalogueDataToRouter(); ///SPRINT12        
+        transport_db::RequestHandler request_handler(catalogue_, renderer_, router_); ///SPRINT12               
         request_handler.GenerateRouter(); ///SPRINT12  
         
         out << "["s << std::endl;

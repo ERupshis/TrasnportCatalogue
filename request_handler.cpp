@@ -50,29 +50,5 @@ namespace transport_db {
     ///// ROUTER//////////////////////////////////////////////////////////////////
     void RequestHandler::GenerateRouter() const { ///SPRINT12
         router_.GenerateRouter();        
-    }
-    void RequestHandler::SetCatalogueDataToRouter() const {  ///SPRINT12
-        SetStopsForRouter();
-        SetRoutesForRouter();
-        SetDistForRouter();
-    }
-    void RequestHandler::SetStopsForRouter() const { ///SPRINT12
-        std::map<std::string_view, const Stop*> stops;
-        for (const auto& stop : db_.GetStopsForRender()) {
-            stops[stop.first] = &stop.second;
-        }
-        router_.SetStops(stops);
-    }
-
-    void RequestHandler::SetRoutesForRouter() const { ///SPRINT12
-        std::map<std::string_view, const Bus*> routes;
-        for (const auto& route : db_.GetRoutesForRender()) {
-            routes[route.first] = &route.second;
-        }
-        router_.SetRoutes(routes);
-    }
-
-    void RequestHandler::SetDistForRouter() const {
-        router_.SetDistances(db_.GetDistForRouter());
-    }
+    }    
 }

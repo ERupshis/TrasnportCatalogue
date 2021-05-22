@@ -3,7 +3,7 @@
 
 #include "json_reader.h"
 #include "request_handler.h"
-#include "map_renderer.h"
+//#include "map_renderer.h"
 
 #include <iostream>
 #include <random>
@@ -13,7 +13,7 @@ using namespace std;
 int main() {    
     transport_db::TransportCatalogue catalog;  
     map_renderer::MapRenderer renderer;
-    transport_router::TransportRouter router;
+    transport_router::TransportRouter router(catalog);
     json_reader::JsonReader json(catalog, renderer, router);
     transport_db::RequestHandler request(catalog, renderer, router);	
 
