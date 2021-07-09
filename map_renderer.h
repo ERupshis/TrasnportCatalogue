@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 
 #include "domain.h"
 #include "geo.h"
@@ -64,6 +64,10 @@ namespace map_renderer {
         void SetRoutes(const std::map<std::string_view, const Bus*> routes);
 
         void Render(std::ostream& out_stream);
+
+        transport_db::RenderSettings GetRenderSettings() const { //SPRINT 14
+            return settings_;
+        }
     private:
         RenderSettings settings_;
         svg::Document doc_;

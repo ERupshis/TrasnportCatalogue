@@ -8,18 +8,62 @@ namespace transport_router {
         settings_ = settings;
     }
     
+    RouterSettings TransportRouter::GetSettings() const { //SPRINT 14
+        return settings_;
+    }
+
+    graph::DirectedWeightedGraph<double>& TransportRouter::ModifyGraph() { // SPRINT 14
+        return graph_;
+    }
+
+    const graph::DirectedWeightedGraph<double>& TransportRouter::GetGraph() const { // SPRINT 14
+        return graph_;
+    }
+
     void TransportRouter::GenerateRouter() {
+        if (router_ != nullptr) { // check if unique_ptr points to data
+            router_.release();
+        }
         AddStops();
         AddEdges();
         router_ = std::make_unique<graph::Router<double>>(graph::Router(graph_));
     }  
 
+    void TransportRouter::GenerateEmptyRouter() { //SPRINT 14
+        if (router_ != nullptr) { // check if unique_ptr points to data
+            router_.release();
+        }
+        //it's necessary to link graph & router
+        //graph & router will be filled from Base later
+        router_ = std::make_unique<graph::Router<double>>(graph::Router(graph_)); 
+    }
+
+    std::unique_ptr<graph::Router<double>>& TransportRouter::ModifyRouter() { //SPRINT 14
+        return router_;
+    }
+
     std::optional<TransportRouter::RouteData> TransportRouter::GetRoute(std::string_view from, std::string_view to) {
         return router_->BuildRoute(vertexes_.at(from).in.id, vertexes_.at(to).in.id);
     }
 
+
+    std::vector<Edges>& TransportRouter::ModifyEdgesData() {
+        return edges_;
+    }
     const std::vector<Edges>* TransportRouter::GetEdgesData() const {
         return &edges_;
+    }
+
+    std::map<std::string_view, StopAsVertexes>& TransportRouter::ModifyVertexes() { //SPRINT 14
+        return vertexes_;
+    }
+
+    const std::map<std::string_view, StopAsVertexes>* TransportRouter::GetVertexes() const { //SPRINT 14
+        return &vertexes_;
+    }
+
+    const graph::Router<double>::RoutesInternalData& TransportRouter::GetRouterData() const { //Sprint 14
+        return router_.get()->GetRoutesInternalData();
     }
 
     ///// ROUTER////////PRIVATE//////////////////////////////////////////      
@@ -66,5 +110,5 @@ namespace transport_router {
                 }
             }
         }
-    }    
+    }   
 } // namespace map_router

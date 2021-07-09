@@ -1,16 +1,16 @@
-﻿#include "transport_catalogue.h"
+#include "transport_catalogue.h"
 
 #include <iomanip>
 
 namespace transport_db {
-	void TransportCatalogue::AddRoute(std::string& name, const std::vector<std::string>& data, bool is_round, const std::string& end_stop) {
+	void TransportCatalogue::AddRoute(std::string name, const std::vector<std::string_view>& data, bool is_round, std::string_view end_stop) {  // SPRINT14
 		std::string& ref_to_name = buses_names_.emplace_back(std::move(name)); // add string in deque
 		std::string_view sv_name{ ref_to_name }; // get reference to value in deque
 		std::vector<std::string_view> v_stops;
-		for (const std::string& stop : data) {
-			std::string_view sv_stop{ stop };
-			v_stops.emplace_back(stops_[sv_stop].name);
-			stops_[sv_stop].buses.insert(sv_name); // add this bus in containers of all stops on route
+		for (std::string_view stop : data) {
+			//std::string_view sv_stop{ stop };
+			v_stops.emplace_back(stops_[stop].name);
+			stops_[stop].buses.insert(sv_name); // add this bus in containers of all stops on route
 		}
 		routes_[sv_name] = { sv_name, v_stops, is_round, stops_.at(end_stop).name };
 	}

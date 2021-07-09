@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 
 #include "domain.h"
 
@@ -25,7 +25,7 @@ namespace transport_db {
 	public:
 		TransportCatalogue() {};
 		////////////////////////////////////////////////////////////////////////////////////////////
-		void AddRoute(std::string& name, const std::vector<std::string>& data, bool is_round, const std::string& end_stop);		
+		void AddRoute(std::string name, const std::vector<std::string_view>& data, bool is_round, std::string_view end_stop);	//SPRINT14	
 		const Bus* SearchRoute(std::string_view name) const;
 
 		struct RouteOutput {

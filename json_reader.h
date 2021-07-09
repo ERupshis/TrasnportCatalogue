@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 
 #include "json.h"
 #include "json_builder.h"
@@ -6,6 +6,7 @@
 #include "map_renderer.h"
 #include "transport_catalogue.h"
 #include "transport_router.h"
+#include "serialization.h"
 
 #include <sstream>
 #include <variant>
@@ -67,37 +68,39 @@ namespace json_reader {
         RequestStat Stat(const Dict& dic);
 
         svg::Color ColorFromNode(const Node& node);
-        RenderSettings Map(const Dict& dic);
+        transport_db::RenderSettings RenderMap(const Dict& dic);
     }
     using namespace detail;
 /////JsonReader class part/////////////////////////////////////////////////////////////////
     class JsonReader {
     public:
-        JsonReader(TransportCatalogue& catalogue, MapRenderer& renderer, TransportRouter& router) ///SPRINT12
-            :catalogue_(catalogue), renderer_(renderer), router_(router) {
+        JsonReader(transport_db::TransportCatalogue& catalogue, MapRenderer& renderer, transport_router::TransportRouter& router, transport_base::TransportSerialization& serialization) ///SPRINT12
+            :catalogue_(catalogue), renderer_(renderer), router_(router), serialization_(serialization) {
         }
 
         void ReadInput(std::istream& input);
 
         void FillCatalogue();
 
-        void PrintRequests(std::ostream& out);
+        void PrintRequests(std::ostream& out, RequestHandler& request_handler);
 
     private:
-        TransportCatalogue& catalogue_;
+        transport_db::TransportCatalogue& catalogue_;
         Document document_;
         std::vector<std::unique_ptr<Request>> requests_;
         MapRenderer& renderer_;
-        TransportRouter& router_; ///SPRINT 12
+        transport_router::TransportRouter& router_; ///SPRINT 12
+        transport_base::TransportSerialization& serialization_; // SPRINT 14
 
         void FillDoc(std::istream& strm);
         void FillBase(const std::vector <Node>& vec);
         void FillStat(const std::vector<Node>& vec);
         void FillRender(const std::map<std::string, json::Node>& dic);
         void FillRouting(const std::map<std::string, Node>& dic); ///SPRINT12
+        void FillSerialization(const std::map<std::string, Node>& dic); // SPRINT 14
         
-        void ProcessStopStatRequest(const TransportCatalogue::StopOutput& request, Builder& dict);        
-        void ProcessBusStatRequest(const TransportCatalogue::RouteOutput& request, Builder& dict);
+        void ProcessStopStatRequest(const transport_db::TransportCatalogue::StopOutput& request, Builder& dict);        
+        void ProcessBusStatRequest(const transport_db::TransportCatalogue::RouteOutput& request, Builder& dict);
     };
 }
 

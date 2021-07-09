@@ -1,8 +1,10 @@
-﻿#include "json_reader.h"
+#include "json_reader.h"
 
 namespace json_reader {
     using namespace std::literals;
     using namespace transport_db;
+    using namespace transport_base;
+
     namespace detail {        
         /////Add data to catalogue Area///////////////////////////////////////////////////////////
         std::map<std::string, int> DistBtwStops(const json::Dict& dic) { // Handle stops distances for BaseStop()
@@ -91,9 +93,9 @@ namespace json_reader {
             }
         }
 
-        RenderSettings RenderMap(const json::Dict& dic) {
+        transport_db::RenderSettings RenderMap(const json::Dict& dic) {
             using namespace detail;
-            RenderSettings res;
+            transport_db::RenderSettings res;
             res.width = dic.at("width"s).AsDouble();
             res.height = dic.at("height"s).AsDouble();
             res.padding = dic.at("padding"s).AsDouble();
@@ -113,11 +115,17 @@ namespace json_reader {
             return res;
         }
 
-        RouterSettings RouterMap(const json::Dict& dic) { ///SPRINT12
+        transport_db::RouterSettings RouterMap(const json::Dict& dic) { ///SPRINT12
             using namespace detail;
-            RouterSettings res;
+            transport_db::RouterSettings res;
             res.bus_velocity_kmh = dic.at("bus_velocity"s).AsInt();
             res.bus_wait_time = dic.at("bus_wait_time"s).AsInt();            
+            return res;
+        }
+
+        SerializationSettings SerializationCatalogue(const json::Dict& dic) { ///SPRINT14          
+            SerializationSettings res;
+            res.file_name = dic.at("file"s).AsString();            
             return res;
         }
     }
@@ -138,6 +146,9 @@ namespace json_reader {
             else if (elem.first == "routing_settings"s) { ///SPRINT 12
                 FillRouting(elem.second.AsMap()); //set render settings
             }
+            else if (elem.first == "serialization_settings"s) { ///SPRINT 14
+                FillSerialization(elem.second.AsMap()); //set serialization_settings
+            }
         }
     }
 
@@ -153,8 +164,12 @@ namespace json_reader {
         }
         for (const auto& elem : requests_) { // 2nd stage - Add Buses
             if (RequestBus* b = dynamic_cast<RequestBus*>(elem.get())) {
-                std::vector<std::string> stops = std::move(b->stops);
-                std::string end_stop = stops.back();
+                std::vector <std::string> string_stops = std::move(b->stops);
+                std::vector<std::string_view> stops;
+                for (const auto& stop : string_stops) {
+                    stops.push_back(stop);
+                }
+                std::string_view end_stop = stops.back();
                 if (!b->is_roundtrip) {
                     stops.reserve(2 * stops.size());
                     stops.insert(stops.end(), next(stops.rbegin()), stops.rend()); // all stops of route are adding beffore 
@@ -171,10 +186,8 @@ namespace json_reader {
         }
     }  
 
-    void JsonReader::PrintRequests(std::ostream& out) {
-        transport_db::RequestHandler request_handler(catalogue_, renderer_, router_); ///SPRINT12               
-        request_handler.GenerateRouter(); ///SPRINT12  
-        
+    void JsonReader::PrintRequests(std::ostream& out, RequestHandler& request_handler) {
+        //transport_db::RequestHandler request_handler(catalogue_, renderer_, router_, serialization_); ///SPRINT14       
         out << "["s << std::endl;
         bool first = true;
         for (const auto& elem : requests_) {
@@ -199,7 +212,7 @@ namespace json_reader {
                 else if (s->type == request_type::MAP) {
                     Builder request{};
                     request.StartDict().Key("request_id"s).Value(s->id);
-                    transport_db::RequestHandler request_handler(catalogue_, renderer_, router_); ///SPRINT12
+                    //transport_db::RequestHandler request_handler(catalogue_, renderer_, router_, serialization_); ///SPRINT14
                     request_handler.SetCatalogueDataToRender();                    
                     std::stringstream strm;
                     renderer_.Render(strm);
@@ -209,10 +222,10 @@ namespace json_reader {
                 }
                 else if (s->type == request_type::ROUTE) { ///SPRINT12
                     Builder request{};                    
-                    const std::vector<Edges>* edges_data = router_.GetEdgesData();
+                    const std::vector<transport_router::Edges>* edges_data = router_.GetEdgesData();
                     auto route_data = router_.GetRoute(s->route.from, s->route.to);                    
                     request.StartDict().Key("request_id"s).Value(s->id);                        
-                        if (route_data->edges.size() > 0 && route_data) { // route is generated
+                        if (route_data && route_data->edges.size() > 0) { // route is generated
                             request.Key("total_time"s).Value(route_data->weight)
                                 .Key("items")
                                 .StartArray();
@@ -294,8 +307,12 @@ namespace json_reader {
     void JsonReader::FillRouting(const std::map<std::string, Node>& dic) { // add Add Routing settings request ///SPRINT12
         router_.SetSettings(RouterMap(dic));
     }
+
+    void JsonReader::FillSerialization(const std::map<std::string, Node>& dic) { ///SPRINT14
+        serialization_.SetSettings(SerializationCatalogue(dic));
+    }
     
-    void JsonReader::ProcessStopStatRequest(const TransportCatalogue::StopOutput& request, Builder& dict) { //overload for GetRoute() STOP        
+    void JsonReader::ProcessStopStatRequest(const transport_db::TransportCatalogue::StopOutput& request, Builder& dict) { //overload for GetRoute() STOP        
         auto [X, buses] = request;        
         if (X[0] == '!') {            
             dict.Key("error_message"s).Value("not found"s);
@@ -314,7 +331,7 @@ namespace json_reader {
         }
     }
 
-    void JsonReader::ProcessBusStatRequest(const TransportCatalogue::RouteOutput& request, Builder& dict) { //overload for GetRoute() BUS
+    void JsonReader::ProcessBusStatRequest(const transport_db::TransportCatalogue::RouteOutput& request, Builder& dict) { //overload for GetRoute() BUS
         auto [X, R, U, L, C] = request;
         if (X[0] != '!') {
             dict.Key("curvature"s).Value(C)

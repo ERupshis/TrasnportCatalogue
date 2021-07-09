@@ -150,31 +150,7 @@ namespace svg {
             FillData(out, "stroke-width"sv, width_);
             FillData(out, "stroke-linecap"sv, line_cap_);
             FillData(out, "stroke-linejoin"sv, line_join_);            
-        }
-        /*
-        void RenderAttrs(std::ostream& out) const {
-            using namespace std::literals;
-            if (fill_color_) {
-                out << " fill=\""sv;
-                std::visit(SolutionColor{ out }, * fill_color_);
-                out << "\""sv;
-            }
-            if (stroke_color_) {
-                out << " stroke=\""sv;
-                std::visit(SolutionColor{ out }, *stroke_color_);
-                out << "\""sv;
-            }
-            if (width_) {
-                out << " stroke-width=\""sv << *width_ << "\""sv;
-            }
-            if (line_cap_) {
-                out << " stroke-linecap=\""sv << *line_cap_ << "\""sv;
-            }
-            if (line_join_) {
-                out << " stroke-linejoin=\""sv << *line_join_ << "\""sv;
-            }
-        }
-        */
+        }        
 
     private:
         Owner& AsOwner() {            

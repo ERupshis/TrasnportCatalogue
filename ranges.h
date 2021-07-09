@@ -32,5 +32,4 @@ namespace ranges {
     auto AsRange(const C& container) {
         return Range{ container.begin(), container.end() };
     }
-
 }  // namespace ranges

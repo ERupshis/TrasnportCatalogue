@@ -1,0 +1,50 @@
+syntax = "proto3";
+
+package transport_base;
+
+message RouterSettings {
+	uint32 bus_wait_time = 1;   
+    uint32 bus_velocity_kmh = 2; 
+}
+///// ROUTER DATA
+message RouteInternalData {
+	double weight = 1;
+	oneof prev_edge {
+		uint32 edgeid = 2;
+	}
+}
+
+message RouteInternalDataVectorElem {
+	oneof elem {
+		RouteInternalData data = 1;
+	}
+}
+
+message RoutesInternalData {
+	repeated RouteInternalDataVectorElem route_internal_data_elem = 1;
+}
+
+message Router {
+	repeated RoutesInternalData routes_internal_data = 1;
+}
+///// TRANSPORTROUTER DATA
+message Vertex {
+	uint32 stop_id = 1;
+	uint32 id = 2; //uint64???? for 64-bit OS
+}
+
+message Edges {
+	uint32 type = 1;
+	uint32 name_id = 2;
+	uint32 span_count = 3;
+	double time = 4;
+	
+}
+
+message TransportRouter {
+	RouterSettings settings = 1;
+	repeated Vertex vertexes = 2;
+	repeated Edges edges = 3;
+}
+
+

@@ -336,18 +336,18 @@ namespace json {
                 out << ',' << std::endl;
             }
         }
-        out << std::endl << "]"s << std::endl;
-    }
+        out << std::endl << "]"s ;
+    }//dsf
     void NodeValueSolution::operator() (const Dict& value) {
-        out << "{"s;
+        out << "{"s <<std::endl;
         for (auto iter = value.begin(); iter != value.end(); ++iter) {
-            out << '"' << iter->first << '"' << ':';
+            out << '"' << iter->first << '"' << ": "s;
             std::visit(NodeValueSolution{ out }, iter->second.GetValue());
             if (iter != prev(value.end())) {
-                out << ", "s;
+                out << ","s << std::endl;
             }
         }
-        out << "}";
+        out << std::endl << "}";
     }
     void NodeValueSolution::operator() (bool value) {
         out << std::boolalpha << value;
@@ -388,4 +388,4 @@ namespace json {
         std::visit(NodeValueSolution{ output }, doc.GetRoot().GetValue());        
     }    
 
-}  // namespace json
+}  // namespace js

@@ -1,4 +1,4 @@
-﻿#include "request_handler.h"
+#include "request_handler.h"
 
 namespace transport_db {
     std::optional<const Bus*> RequestHandler::GetBusStat(std::string_view bus_name) {
@@ -51,4 +51,8 @@ namespace transport_db {
     void RequestHandler::GenerateRouter() const { ///SPRINT12
         router_.GenerateRouter();        
     }    
+    ///// SERIALIZATION///////////////////////////////////////////////////////////
+    void RequestHandler::SaveBase() const { ///SPRINT14
+        serialization_.SerializeBase();
+    }
 }

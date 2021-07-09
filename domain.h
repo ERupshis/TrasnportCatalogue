@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 
 #include "geo.h"
 #include <string_view>
