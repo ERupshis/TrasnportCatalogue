@@ -26,7 +26,8 @@ namespace transport_db {
 
         void GenerateRouter() const; ///SPRINT12  
 
-        void SaveBase() const; ///SPRINT14
+        void SerializeBase() const; ///SPRINT14
+        void DeserializeBase() const; ///SPRINT14
 
     private:        
         const TransportCatalogue& db_;

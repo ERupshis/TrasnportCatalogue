@@ -52,7 +52,12 @@ namespace transport_db {
         router_.GenerateRouter();        
     }    
     ///// SERIALIZATION///////////////////////////////////////////////////////////
-    void RequestHandler::SaveBase() const { ///SPRINT14
+    void RequestHandler::SerializeBase() const { ///SPRINT14
+        GenerateRouter();
         serialization_.SerializeBase();
+    }
+
+    void RequestHandler::DeserializeBase() const { ///SPRINT14        
+        serialization_.DeserializeBase();
     }
 }

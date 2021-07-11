@@ -18,3 +18,7 @@ message RenderSettings {
     double underlayer_width = 11;
     repeated Color color_palette = 12;	
 }
+
+message MapRenderer {
+    RenderSettings settings = 1;
+}

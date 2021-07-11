@@ -1,5 +1,7 @@
 syntax = "proto3";
 
+import "graph.proto";
+
 package transport_base;
 
 message RouterSettings {
@@ -37,14 +39,17 @@ message Edges {
 	uint32 type = 1;
 	uint32 name_id = 2;
 	uint32 span_count = 3;
-	double time = 4;
-	
+	double time = 4;	
+}
+
+message TransportRouterData {
+	repeated Vertex vertexes = 1;
+	repeated Edges edges = 2;
 }
 
 message TransportRouter {
 	RouterSettings settings = 1;
-	repeated Vertex vertexes = 2;
-	repeated Edges edges = 3;
+	TransportRouterData transport_router = 2;
+	Router router = 3;
+	Graph graph = 4;
 }
-
-
