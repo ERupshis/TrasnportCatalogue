@@ -140,4 +140,5 @@ Database storage is performed via data serialization in Google protobuf.
       ]
       ```
       
-Example of request and answer you can find in INPUT.txt and OUTPUT.txt
+Example of request and answer to db you can find in example folder
+request to db are performed via cin & cout streams.
